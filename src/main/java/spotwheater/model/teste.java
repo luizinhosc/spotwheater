@@ -9,20 +9,11 @@ public class teste {
 
     public static void main(String[] args) {
 
-        HashMap<String, String> countries = new HashMap<String, String>();
-        //String[] countryCodes = Locale.getISOCountries();
-        String countryCodes = new Locale("","br").getDisplayCountry();
+        RestTemplate restTemplate = new RestTemplate();
+        final String uri = "https://api.openweathermap.org/data/2.5/weather?q=araraquara,BR&APPID=4b08e7a8d3ed6417d6e057a0c4687d99";
 
-//        for (Locale cc : countryCodes) {
-//            // country name , country code map
-//            countries.put(new Locale("", cc).getDisplayCountry(), cc.toUpperCase());
-//        }
-
-//        RestTemplate restTemplate = new RestTemplate();
-//        final String uri = "https://api.openweathermap.org/data/2.5/weather?q=araraquara,BR&APPID=4b08e7a8d3ed6417d6e057a0c4687d99";
-//
-//        SpotWheater spotWheater = restTemplate.getForObject(uri, SpotWheater.class);
-//        //log.info(String.valueOf(spotWheater));
-//        System.out.println(spotWheater);
+        SpotWheater spotWheater = restTemplate.getForObject(uri, SpotWheater.class);
+        //log.info(String.valueOf(spotWheater));
+        System.out.println(spotWheater);
     }
 }

@@ -4,17 +4,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import spotwheater.exception.NotFoundException;
 import spotwheater.model.SpotWheater;
 import spotwheater.util.ConsumeServices;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -28,27 +27,50 @@ public class SpotWheaterServiceImpl implements SpotWheaterService {
 
     private final double  formuleValue = 273.15;
 
+    ConsumeServices consumeServices = new ConsumeServices();
+
     @Override
     public SpotWheater findOne(String city, String country) throws NotFoundException {
 
-        ConsumeServices consumeServices = new ConsumeServices();
+        try {
+            Map<String, String> vars = getParameterUriCall(city,country);
 
-        Map<String, String> vars = new HashMap<>();
-        vars.put("city",city.replace(" ","+")+",BR");
-        vars.put("token",consumeServices.TOKEN);
+            RestTemplate restTemplate = new RestTemplate();
+            SpotWheater spotWheater = restTemplate.getForObject(consumeServices.URI, SpotWheater.class,vars);
+            log.info(String.valueOf(spotWheater));
 
-        RestTemplate restTemplate = new RestTemplate();
-        SpotWheater spotWheater = restTemplate.getForObject(consumeServices.URI, SpotWheater.class,vars);
-     //   SpotWheater spotWheater = restTemplate.getForObject("https://api.openweathermap.org/data/2.5/weather?q=araraquara,BR&APPID=4b08e7a8d3ed6417d6e057a0c4687d99", SpotWheater.class);
-        log.info(String.valueOf(spotWheater));
+            changeTemperatureResult(spotWheater);
 
-        if (spotWheater == null){
-            throw new NotFoundException(messageSource.getMessage("cityNotFound",null,null));
+            return spotWheater;
+
+        }catch (Exception e){
+               throw  new NotFoundException(messageSource.getMessage("cityNotFound",null,null));
         }
 
-        changeTemperatureResult(spotWheater);
 
-        return spotWheater;
+
+    }
+
+    private Map<String,String> getParameterUriCall(String city, String country) {
+
+        Map<String, String> vars = new HashMap<>();
+        vars.put("city",city+","+getCountryCode(country));
+        vars.put("token",consumeServices.TOKEN);
+
+        return vars;
+    }
+
+    private String getCountryCode(String country) {
+        String codSearch=null;
+        String[] countries = Locale.getISOCountries();
+        for (String singleCountry: countries) {
+            Locale locale = new Locale("",singleCountry);
+            String code = locale.getDisplayName();
+            if(code.equalsIgnoreCase(country)){
+                codSearch=singleCountry.toString();
+            }
+        }
+        return codSearch;
     }
 
     private void changeTemperatureResult(SpotWheater spotWheater) {
