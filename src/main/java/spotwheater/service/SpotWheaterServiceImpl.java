@@ -5,8 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import spotwheater.exception.NotFoundException;
 import spotwheater.model.SpotWheater;
@@ -17,7 +15,6 @@ import java.util.Locale;
 import java.util.Map;
 
 @Service
-@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class SpotWheaterServiceImpl implements SpotWheaterService {
 
     @Autowired
